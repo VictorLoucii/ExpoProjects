@@ -3,7 +3,7 @@
 <img alt="Platform - Expo" src="https://img.shields.io/badge/platform-Expo-808080.svg?style=flat-square">
 
 
-WeatherWise is a sleek, modern, and intuitive weather forecast application built with React Native and Expo. It provides real-time weather data, a 7-day forecast, and a dynamic, location-aware user experience. The app features a beautiful, blurred-glassmorphism interface that changes to reflect the current weather conditions.
+CaliWeather is a sleek, modern, and intuitive weather forecast application built with React Native and Expo. It provides real-time weather data, a 7-day forecast, and a dynamic, location-aware user experience. The app features a beautiful, blurred-glassmorphism interface that changes to reflect the current weather conditions.
 
 ✨ Features
 

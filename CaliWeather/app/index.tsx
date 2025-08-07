@@ -29,11 +29,6 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
 
-
-  <Link href="/details">
-    <Text>View Detailed Forecast</Text>
-  </Link>
-
   const handleLocation = (loc: any) => {
     console.log('loc: ', loc);
     setLocations([]); //clear/empty the array
