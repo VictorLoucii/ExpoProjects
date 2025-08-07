@@ -1,50 +1,52 @@
-# Welcome to your Expo app 👋
+🌦️ CaliWeather - A React Native Weather App
+<p align="center">
+<img alt="Platform - Expo" src="https://img.shields.io/badge/platform-Expo-808080.svg?style=flat-square">
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## Get started
+WeatherWise is a sleek, modern, and intuitive weather forecast application built with React Native and Expo. It provides real-time weather data, a 7-day forecast, and a dynamic, location-aware user experience. The app features a beautiful, blurred-glassmorphism interface that changes to reflect the current weather conditions.
 
-1. Install dependencies
+✨ Features
 
-   ```bash
-   npm install
-   ```
+Dynamic UI: A beautiful, immersive user interface with a blurred background that provides a modern, clean look.
 
-2. Start the app
+Current Weather: Get instant access to the current temperature, weather conditions (e.g., "Partly Cloudy"), wind speed, humidity, and sunrise/sunset times.
 
-   ```bash
-   npx expo start
-   ```
+7-Day Forecast: Plan your week ahead with a detailed 7-day forecast, including daily average temperatures, weather conditions, and dates.
 
-In the output, you'll find options to open the app in a
+Location-Based Weather:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Auto-Detection: Automatically fetches weather data for your current physical location using the device's GPS.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+City Search: A powerful search functionality allows you to find and view weather for any city in the world.
 
-## Get a fresh project
+Detailed Hourly Insights: (Coming Soon!) A dedicated screen to view detailed hourly forecasts, including:
 
-When you're ready, run:
+Hottest and coldest times of the day.
 
-```bash
-npm run reset-project
-```
+Precipitation probability by the hour.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Recommendations for the best time to be outdoors.
 
-## Learn more
+Persistent State: Your last searched location is saved locally, so the app always opens with relevant data, providing a seamless user experience.
 
-To learn more about developing your project with Expo, look at the following resources:
+Loading & Empty States: Smooth loading indicators and helpful messages guide the user during data fetching or when no location is selected.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+🛠️ Tech Stack & Tools
 
-## Join the community
+Framework: React Native with Expo
 
-Join our community of developers creating universal apps.
+Navigation: Expo Router for file-based, native navigation.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Styling: NativeWind (Tailwind CSS for React Native) for rapid and consistent UI development.
+
+State Management: React Hooks (useState, useEffect, useCallback).
+
+API Client: Axios for making requests to the weather API.
+
+Data API: WeatherAPI.com for all weather and location data.
+
+Icons: Heroicons for crisp, modern iconography.
+
+Local Storage: AsyncStorage for persisting the user's last-viewed city.
+
+Utilities: Lodash (for debouncing search input).

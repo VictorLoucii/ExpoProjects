@@ -24,8 +24,11 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
+      {/* in expo router index.tsx is designated as the initialRouteName */}
+        <Stack.Screen name="details" options={{ headerShown: false }} />
         <Stack.Screen name="index" options={{ headerShown: false }} />
-    
+
+
 
         <Stack.Screen name="+not-found" />
       </Stack>

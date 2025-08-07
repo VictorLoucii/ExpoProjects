@@ -12,10 +12,13 @@ import { fetchCurrentWeather, fetchFutureWeather, fetchLocations } from '@/api/w
 import { weatherImages } from '../constants/index.js';
 import { getData, storeData } from '@/utils/asyncStorage.js'
 import * as Location from 'expo-location';
+import { Link } from 'expo-router';
 
 
 
 export default function HomeScreen() {
+
+
 
   const [showSearch, toggleSearch] = useState(false);
   // const [locations, setLocations] = useState([1, 2, 3]);  //dummy array data for testing at start
@@ -23,9 +26,13 @@ export default function HomeScreen() {
   const [weather, setWeather] = useState({});
   const [loading, setLoading] = useState(true);
 
-
-
   const insets = useSafeAreaInsets();
+
+
+
+  <Link href="/details">
+    <Text>View Detailed Forecast</Text>
+  </Link>
 
   const handleLocation = (loc: any) => {
     console.log('loc: ', loc);
@@ -150,7 +157,7 @@ export default function HomeScreen() {
         setWeather(data);
         storeData('city', data.location.name); // Store the potentially updated name
       }
-      setLoading(false); 
+      setLoading(false);
     });
   };
 
@@ -161,7 +168,7 @@ export default function HomeScreen() {
       let cityName = myCity || 'New Delhi'; // Use stored city or default to 'New Delhi'
 
       // Set loading to true and IMMEDIATELY fetch weather for the cached city
-      // This will make the app feel instant by showing the last known data.
+      // This will make the app feel instant by showing the last known data instead of a blank loading screen
       setLoading(true);
       fetchWeatherByCityName(cityName); // Use helper function 'fetchWeatherByCityName'
 
@@ -198,7 +205,7 @@ export default function HomeScreen() {
       >
 
         {/* search section */}
-        <View style={{ height: '7%' }} className="mx-4 relative z-50">
+        <View style={{ height: '7%' }} className="mx-4 relative z-50 mb-3">
 
           {/* The Search Bar Itself (<View>) which contains text input field and the icon */}
           <View className="flex-row justify-end items-center rounded-full overflow-hidden"
@@ -291,14 +298,18 @@ export default function HomeScreen() {
                         </Text>
                       </Text>
 
-                      {/* weather image */}
+                      {/* Clickable Weather Image */}
                       <View className='flex-row justify-center'>
-                        <Image
-                          // source={require('../assets/images/partlycloudy.png')}
-                          // source={{ uri: 'https:' + current?.condition?.icon }}  //getting icon from weahter api
-                          source={weatherImages[current?.condition?.text] || weatherImages['other']}
-                          className='w-52 h-52'
-                        />
+                        <Link href={{ pathname: "/details", params: { city: location?.name } }} asChild>
+                          <TouchableOpacity>
+                            <Image
+                              // source={require('../assets/images/partlycloudy.png')}
+                              // source={{ uri: 'https:' + current?.condition?.icon }}  //getting icon from weahter api
+                              source={weatherImages[current?.condition?.text] || weatherImages['other']}
+                              className='w-52 h-52'
+                            />
+                          </TouchableOpacity>
+                        </Link>
                       </View>
 
                       {/* Geolocation Icon, positioned absolutely */}
