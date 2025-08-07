@@ -11,8 +11,7 @@ import { debounce } from 'lodash';
 import { fetchCurrentWeather, fetchFutureWeather, fetchLocations } from '@/api/weather';
 import { weatherImages } from '../constants/index.js';
 import { getData, storeData } from '@/utils/asyncStorage.js'
-
-
+import * as Location from 'expo-location';
 
 
 
@@ -64,29 +63,123 @@ export default function HomeScreen() {
 
   const { current, location } = weather;  //destructuring
 
-  // This function fetches data for a default location on app start
-  const fetchMyWeatherData = async () => {
-    let myCity = await getData('city');  //calling the getData function in asyncStorage.js
-    let cityName = 'New Delhi';
-    if (myCity) {
-      cityName = myCity;
+
+  const handleCurrentLocation = async () => {
+    setLoading(true); // Show loading indicator
+
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      // Maybe show an alert to the user here
+      setLoading(false);
+      console.log("Permission to access location was denied");
+      return;
     }
+
+    // Get Coordinates
+    let location = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+
+    // Reverse Geocode the coordinates to get an address
+    let address = await Location.reverseGeocodeAsync({ latitude, longitude });
+    // LINE FOR DEBUGGING 
+    // console.log("Full Address Object:", address[0]);
+
+    //  CUSTOM NAMING LOGIC TO MATCH my location FORMAT 
+    let customLocationName = 'Current Location'; // A fallback default
+    if (address && address[0]) {
+      const addr = address[0];
+
+      // Split the formattedAddress string into an array of its parts
+      const addressParts = addr.formattedAddress ? addr.formattedAddress.split(', ') : [];
+
+      // Extract the specific part you need (e.g., "moti lal village")
+      // In your example, it's the second part of the formatted address.
+      const villageOrArea = addressParts.length > 1 ? addressParts[1] : null;
+
+      // Build an array with all the desired components
+      const locationComponents = [
+        addr.name,          // this will be house address
+        villageOrArea,      // street name
+        addr.district,      // colony name
+        // addr.postalCode,    // pin code
+        // addr.country        // country name
+      ];
+
+      // Join the components that actually exist and convert to lowercase
+      customLocationName = locationComponents
+        .filter(Boolean) // This removes any null or undefined parts
+        .join(', ')
+        .toLowerCase();
+    }
+    // --- END OF LOGIC ---
+
+    //Fetch weather using the accurate coordinates
+    fetchFutureWeather({
+      cityName: `${latitude},${longitude}`,
+      days: '7',
+    }).then(data => {
+      // Update the weather data, but OVERWRITE the location name with your specific one
+      if (data) {
+        const updatedData = {
+          ...data,
+          location: {
+            ...data.location,
+            // Use our custom name but keep the country from the API for the sub-text
+            name: customLocationName,
+            country: data.location.country,
+          },
+        };
+        setWeather(updatedData);
+        setLoading(false);
+        storeData('city', customLocationName);
+      }
+      else {
+        setLoading(false); // case where data fetch fails
+      }
+    });
+
+  };
+
+  // simple function to fetch weather by city name
+  const fetchWeatherByCityName = (cityName, days = '7') => {
     fetchFutureWeather({
       cityName,
-      days: '7',
+      days,
     }).then((data) => {
-      setWeather(data);
-      setLoading(false); //Set loading to false when data is received
-    })
-  }
+      if (data) {
+        setWeather(data);
+        storeData('city', data.location.name); // Store the potentially updated name
+      }
+      setLoading(false); 
+    });
+  };
 
   useEffect(() => {
-    fetchMyWeatherData();
-  }, [])
+    const loadInitialData = async () => {
+      // Load the last saved city from async storage
+      let myCity = await getData('city');
+      let cityName = myCity || 'New Delhi'; // Use stored city or default to 'New Delhi'
+
+      // Set loading to true and IMMEDIATELY fetch weather for the cached city
+      // This will make the app feel instant by showing the last known data.
+      setLoading(true);
+      fetchWeatherByCityName(cityName); // Use helper function 'fetchWeatherByCityName'
+
+      //in the background, try to get the user's current location for fresh data
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        // If permission is granted, call the handleCurrentLocation function you already built.
+        // This will run in the background and update the UI with fresh, reverse-geocoded data when it's ready.
+        // Note: We don't need to call setLoading(true) here again because it was already set.
+        handleCurrentLocation();
+      }
+    };
+
+    loadInitialData();
+  }, []);
 
 
 
-  // Using useEffect to call the function once when the component mounts
   return (
     <View className='flex-1 relative'>
       <StatusBar style="light" />
@@ -124,6 +217,7 @@ export default function HomeScreen() {
               ) : null
             }
 
+            {/* search icon */}
             <TouchableOpacity
               onPress={() => toggleSearch(!showSearch)}
               style={{ backgroundColor: Colors.theme.bgWhite(0.3) }}
@@ -132,6 +226,7 @@ export default function HomeScreen() {
               <MagnifyingGlassIcon size={25} color={'white'} />
             </TouchableOpacity>
           </View>
+
           {/* below is 'search results' statements make it sibling of the search container otherwise it won't be visible due to native wind styling prop : oveflow-hidden */}
           {
             locations.length > 0 && showSearch ? (
@@ -165,6 +260,7 @@ export default function HomeScreen() {
           }
         </View>
         {/* search section ends here */}
+
 
         {
           loading ? (
@@ -205,6 +301,18 @@ export default function HomeScreen() {
                         />
                       </View>
 
+                      {/* Geolocation Icon, positioned absolutely */}
+                      <TouchableOpacity
+                        onPress={handleCurrentLocation}
+                        className="absolute top-1/3 right-2 rounded-full p-1" // Position relative to the parent View
+                        style={{ transform: [{ translateY: -15 },], backgroundColor: Colors.theme.bgWhite(0.3) }} // Fine-tune vertical centering
+
+                      >
+                        <MapPinIcon size={30} color={'white'} />
+                      </TouchableOpacity>
+
+
+
                       {/* degreee/celsius data */}
                       <View className='space-y-2'>
                         <Text className='text-center font-bold text-white text-6xl ml-5'>
@@ -226,7 +334,7 @@ export default function HomeScreen() {
                             className='h-6 w-6'
                           />
                           <Text className='text-white font-semibold text-base ml-2'>
-                            {current?.wind_kph+" "}km/hr
+                            {current?.wind_kph + " "}km/hr
                           </Text>
                         </View>
                         <View className='flex-row space-x-2 items-center'>
@@ -263,22 +371,20 @@ export default function HomeScreen() {
                         </View>
                       </View>
 
-
-
                     </View>
 
                     {/* forecast section for future days */}
                     <View className='mb-2 space-y-3 mt-6'>
                       <View className='flex-row justify-center'>
-                      <View
-                        className='flex-row items-center mx-5 space-x-2 justify-center h-9 rounded-full px-4'
-                        style={{ backgroundColor: Colors.theme.bgWhite(0.15) }}
-                      >
-                        <CalendarDaysIcon size={22} color={'white'} />
-                        <Text className='text-white text-base ml-2'>
-                          Daily Forecast
-                        </Text>
-                      </View>
+                        <View
+                          className='flex-row items-center mx-5 space-x-2 justify-center h-9 rounded-full px-4'
+                          style={{ backgroundColor: Colors.theme.bgWhite(0.15) }}
+                        >
+                          <CalendarDaysIcon size={22} color={'white'} />
+                          <Text className='text-white text-base ml-2'>
+                            Daily Forecast
+                          </Text>
+                        </View>
 
                       </View>
 
@@ -295,10 +401,10 @@ export default function HomeScreen() {
                           weather?.forecast?.forecastday?.map((item, index) => {
                             // Creating a Date object from the API's date string
                             const date = new Date(item.date);
-                            console.log('date:', date);
+                            // console.log('date:', date);
                             // Format the date to get the short day name (e.g., "Mon")
                             const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-                            console.log('dayName:', dayName);
+                            // console.log('dayName:', dayName);
 
                             return (
                               <View

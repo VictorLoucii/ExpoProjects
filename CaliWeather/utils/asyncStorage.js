@@ -56,3 +56,6 @@ export const clearAllData = async () => {
         console.error('Error clearing storage:', error);
     }
 };
+
+
+//note: AsyncStorage.setItem and getItem only store strings, so if you're storing objects, you must use JSON.stringify(value) and JSON.parse(value) when storing/retrieving.
